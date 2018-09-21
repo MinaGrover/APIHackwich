@@ -25,6 +25,9 @@ class SourcesViewController: UITableViewController {
         self.title = "News Sources"
         let query = "https://newsapi.org/v1/sources?language=en&country=us&apiKey=\(apiKey)"
         
+        DispatchQueue.global(qos: .userInitiated).async {
+            [unowned self] in
+        
         if let url = URL(string: query)
         {
             if let data = try? Data(contentsOf: url)
@@ -32,13 +35,13 @@ class SourcesViewController: UITableViewController {
                 let json = try! JSON(data: data)
                 if json["status"] == "ok"
                 {
-                    parse(json: json)
+                    self.parse(json: json)
                     return
                 }
             }
         }
-        loadError()
-        
+            self.loadError()
+        }
     }
 
     func parse(json: JSON)
@@ -52,10 +55,16 @@ class SourcesViewController: UITableViewController {
             let source = ["id": id, "name": name, "description": description]
             sources.append(source)
         }
-        tableView.reloadData()
+        DispatchQueue.main.async {
+            [unowned self] in
+            self.tableView.reloadData()
+        }
     }
     
     func loadError() {
+        DispatchQueue.main.async {
+            [unowned self] in
+        
         let alert = UIAlertController(title: "Loading Error",
                                       message: "There was a problem loading the news feed",
                                       preferredStyle: .actionSheet)
@@ -63,7 +72,8 @@ class SourcesViewController: UITableViewController {
         alert.addAction(UIAlertAction(title: "OK",
                                       style: .default, handler: nil))
         
-        present(alert, animated: true, completion: nil)
+        self.present(alert, animated: true, completion: nil)
+        }
     }
     
     
